@@ -17,7 +17,8 @@ elation.require(['ui.list','utils.template'], function() {
       this.labels.push(elation.ui.button({
         append: this,
         path: '',
-        label: this.args.root_icon || '☰'
+        label: '',
+        classname: this.args.root_icon
       }).container);
 
       for (var i=0, fullpath=''; i<paths.length; i++) {

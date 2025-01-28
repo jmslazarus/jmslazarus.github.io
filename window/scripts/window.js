@@ -369,9 +369,9 @@ elation.require(['ui.base', 'ui.button', 'ui.buttonbar', 'ui.input', 'ui.toggle'
         this.defaultcontainer = { tag: 'div', classname: 'window_titlebar' };
         this.init = function() {
             this.labels = {
-                minimize: '–',
-                maximize: '□',
-                restore: '₪',
+                minimize: 'fa-solid fa-window-minumize',
+                maximize: 'fa-solid fa-window-maximize',
+                restore: 'fa-solid fa-window-restore',
                 close: 'fa-solid fa-close'
             };
 

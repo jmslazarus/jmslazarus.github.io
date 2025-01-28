@@ -1024,10 +1024,10 @@ elation.require([
 
       var create = elation.html.create,
           labels = {
-            back: '⇦',
-            forward: '⇨',
-            up: '↰',
-            home: '⌂'
+            back: 'fa-solid fa-arrow-left',
+            forward: 'fa-solid fa-arrow-right',
+            up: 'fa-solid fa-arrow-up',
+            home: 'fa-solid fa-home'
           };
 
       this.elements = {
@@ -1039,18 +1039,15 @@ elation.require([
 
       var buttons = {
         back: {
-          label: labels.back,
-          classname: "fs_buttonbar_back",
+          classname: "fs_buttonbar_back" + " " + labels.back,
           events: { click: elation.bind(this, this["back"]) }
         },
         forward: {
-          label: labels.forward,
-          classname: "fs_buttonbar_forward",
+          classname: "fs_buttonbar_forward" + " " + labels.forward,
           events: { click: elation.bind(this, this["forward"]) }
         },
         up: {
-          label: labels.up,
-          classname: "fs_buttonbar_up",
+          classname: "fs_buttonbar_up" + " " + labels.up,
           events: { click: elation.bind(this, this["up"]) }
         }
       };
@@ -1139,7 +1136,7 @@ elation.require([
 
       this.button = elation.ui.button({
         append: this,
-        label: '+'
+        classname: 'fa-solid fa-plus'
       });
 
       this.sources = elation.html.create({ 
