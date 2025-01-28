@@ -1,8 +1,91 @@
 <html>
-  <head>
-    <title>this is the title</title>
-  </head>
-  <body>
-    <p>this is the <b>index.html</b></p>
-  </body>
+    <head>
+        <title>this is the title</title>
+        <link rel="stylesheet" type="text/css" href="desktop/css/desktop.css" />
+        <link rel="stylesheet" type="text/css" href="window/css/window.css" />
+        <link rel="stylesheet" type="text/css" href="hack/css/hack.css" />
+        <!--script src="http://cdn.peerjs.com/0.3/peer.min.js"></script-->
+        <script src="https://kit.fontawesome.com/d0656870ea.js" crossorigin="anonymous"></script>
+
+        <script src="utils/scripts/elation.js"></script>
+        <script src="ui/scripts/base.js"></script>
+        <script src="ui/scripts/content.js"></script>
+        <script src="utils/scripts/template.js"></script>
+        
+        <script src="desktop/scripts/desktop.js"></script>
+        <script src="window/scripts/window.js"></script>
+        <script src="hack/hack.js"></script>
+        <script src="hack/scripts/hack.js"></script>
+        <script src="hack/scripts/hack-server.js"></script>
+    </head>
+    <body>
+        <div data-elation-component="desktop.DesktopManager"
+            data-elation-name="main">
+        </div>
+        <li data-elation-component="desktop.Icon" 
+            data-elation-args.type="SYS"
+            data-elation-args.name="LazarOS Login"
+            data-elation-args.title="Login"
+            data-elation-args.windowid="application_login"
+            data-elation-args.windowtype="window.modal"
+            data-elation-args.content="hack.login">
+        </li>
+        <li data-elation-component="desktop.Icon" 
+            data-elation-args.type="SYS"
+            data-elation-args.name="World Settings"
+            data-elation-args.title="World Settings"
+            data-elation-args.windowid="application_admin"
+            data-elation-args.windowtype="window.dialog"
+            data-elation-args.content="hack.admin">
+        </li>
+        <li data-elation-component="desktop.Icon" 
+            data-elation-args.type="SYS"
+            data-elation-args.name="System Explorer"
+            data-elation-args.title="Explorer"
+            data-elation-args.windowname="application_explorer"
+            data-elation-args.windowtype="window.window"
+            data-elation-args.content="hack.explorer">
+        </li>
+        <li data-elation-component="desktop.Icon" 
+            data-elation-args.type="WWW"
+            data-elation-args.name="Resume Viewer"
+            data-elation-args.title="Jamey Lazarus Resume"
+            data-elation-args.windowtype="window.iframe"
+            data-elation-args.content="./Jamey-Lazarus-Resume-2025.pdf">
+        </li>
+        <li data-elation-component="desktop.Icon"
+            data-elation-args.type="APP"
+            data-elation-args.name="Cat Pics"
+            data-elation-args.title="Photo Viewer"
+            data-elation-args.windowtype="window.dialog"
+            data-elation-args.windowname="pics"
+            data-elation-args.content="hack.zuulpics">
+        </li>
+        <li data-elation-component="desktop.Icon" 
+            data-elation-args.type="APP"
+            data-elation-args.name="Terminal"
+            data-elation-args.title="WebSocket Terminal Client"
+            data-elation-args.windowid="application_terminal"
+            data-elation-args.windowtype="window.window"
+            data-elation-args.content="hack.terminal">
+        </li>
+        <li data-elation-component="desktop.Icon" 
+            data-elation-args.type="APP"
+            data-elation-args.name="WebRTC Whiteboard"
+            data-elation-args.title="Connecting..."
+            data-elation-args.windowname="application_peer"
+            data-elation-args.windowtype="window.window"
+            data-elation-args.content="hack.WebRTC_Client">
+        </li>
+        <li data-elation-component="desktop.Icon" 
+            data-elation-args.type="WWW"
+            data-elation-args.name="WebGL Demo"
+            data-elation-args.title="Stella Imperia: a WebGL/Three.js Demo by Jamey Lazarus [WIP]"
+            data-elation-args.windowid="simperia"
+            data-elation-args.windowtype="window.iframe"
+            data-elation-args.content="http://www.meobets.com/~lazarus/elation/index.php/space/imperium.popup">
+        </li>
+        <!--script src="/scripts/hack/bower/bower_components/webcomponentsjs/webcomponents.min.js"></script-->
+        <!--link rel="import" href="/scripts/hack/bower/telnet-element.html"-->
+    </body>
 </html>

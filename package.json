@@ -1,0 +1,20 @@
+{
+  "name": "jmslazarus.github.io",
+  "version": "1.0.0",
+  "description": "portfolio",
+  "homepage": "https://github.com/jmslazarus/jmslazarus.github.io#readme",
+  "bugs": {
+    "url": "https://github.com/jmslazarus/jmslazarus.github.io/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmslazarus/jmslazarus.github.io.git"
+  },
+  "license": "ISC",
+  "author": "Jamey Lazarus",
+  "type": "commonjs",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
