@@ -363,7 +363,7 @@ elation.extend("component", new function() {
     var componentbase = componentname.replace('.', '/');
     var root = elation.file.root()
     var batch = new elation.file.batch();
-    batch.add(root + '/scripts/' + componentbase + '.js', 'javascript');
+    batch.add(root + '/' + componentbase + '.js', 'javascript');
     //batch.add(root + '/css/' + componentbase + '.css', 'css');
     // FIXME - batch loading seems to not load css files reliably
     elation.file.get('css', root + '/css/' + componentbase + '.css');
@@ -2087,7 +2087,7 @@ elation.extend('file.root', function() {
 elation.extend('require', function(modules, callback) {
   if (!elation.utils.isArray(modules)) modules = [modules];
   if (!this.requireactivebatchjs) {
-    this.requireactivebatchjs = new elation.require.batch('js', './');
+    this.requireactivebatchjs = new elation.require.batch('js', '');
   }
   this.requireactivebatchjs.addrequires(modules, callback);
 });
@@ -2095,7 +2095,7 @@ elation.extend('requireCSS', function(modules, callback) {
   if (!elation.env.isWorker) {
     if (!elation.utils.isArray(modules)) modules = [modules];
     if (!this.requireactivebatchcss) {
-      this.requireactivebatchcss = new elation.require.batch('css', './');
+      this.requireactivebatchcss = new elation.require.batch('css', '');
     }
     this.requireactivebatchcss.addrequires(modules, callback);
   }
@@ -2108,7 +2108,7 @@ elation.extend('require.batch', function(type, webroot) {
 
   this.type = type;
   // console.log(webroot, elation.config.get('dependencies.path', type === 'js' ? '/scripts' : '/css'), type);
-  this.webroot = 'src/components' + elation.utils.any(webroot, elation.config.get('dependencies.path', type === 'js' ? '/scripts' : '/css'));
+  this.webroot = 'src/components' + elation.utils.any(webroot, elation.config.get('dependencies.path', type === 'js' ? '/' : '/'));
 
   this.pending = [];
   this.fulfilled = {};
@@ -2151,7 +2151,7 @@ elation.extend('require.batch', function(type, webroot) {
     }
     if (script) {
       var scriptsrc = script.src,
-          webroot = '/scripts', // FIXME - hardcode script webroot, because this method only works for JS
+          webroot = '/', // FIXME - hardcode script webroot, because this method only works for JS
           start = scriptsrc.indexOf(webroot) + webroot.length + 1,
           end = scriptsrc.lastIndexOf('.js');
       
