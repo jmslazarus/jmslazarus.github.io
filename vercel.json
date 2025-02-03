@@ -3,11 +3,11 @@
     "name": "jmslazarus.github.io",
     "builds": [
         {
-            "use": "@vercel/static"
-        },
-        {
             "src": "server/hack-server",
             "use": "@vercel/node"
+        },
+        {
+            "use": "@vercel/static"
         }
     ],
     "routes": [
