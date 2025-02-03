@@ -1,0 +1,16 @@
+{
+    "version": 2,
+    "name": "jmslazarus.github.io",
+    "builds": [
+        {
+            "src": "server/hack-server",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "server/hack-server"
+        }
+    ]
+}

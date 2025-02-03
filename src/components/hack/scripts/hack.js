@@ -626,7 +626,7 @@ elation.require([
     this.init = function() {
       this.message({data:'Connecting... '})
       elation.events.add(this.container, 'click', this);
-      this.connection = new WebSocket('ws://localhost:8086/terminal');
+      this.connection = new WebSocket('wss://localhost/terminal');
       this.connection.onmessage = elation.bind(this, this.message);
 
       (function(self) {

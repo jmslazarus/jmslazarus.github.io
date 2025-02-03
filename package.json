@@ -21,5 +21,8 @@
   "dependencies": {
     "peer": "^1.0.2",
     "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "https": "^1.0.0"
   }
 }

@@ -103,7 +103,9 @@ elation.extend('hack.PeerServer', new function() {
 
 elation.extend('hack.TerminalServer', new function() {
   this.init = function() {
-    websockserver = this.websockserver = new ws.Server({ host: "localhost", port: 8086, path: '/terminal' });
+    websockserver = this.websockserver = new ws.Server({ 
+      path: '/terminal'
+    });
     websockserver.on('connection', elation.bind(this, this.connected));
     console.log('[TerminalServer] Listening for websockets');
   }
