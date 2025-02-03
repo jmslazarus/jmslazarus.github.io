@@ -4,7 +4,7 @@
     "builds": [
         {
             "use": "@vercel/static"
-        }
+        },
         {
             "src": "server/hack-server",
             "use": "@vercel/node"
