@@ -1,11 +1,11 @@
 if (typeof require != 'undefined') {
-  var elation = require("utils/elation"),
+  var elation = require("../../utils/scripts/elation.js"),
       ws = require("ws"),
       net = require('net'),
       fs = require('fs'),
       peer = require('peer');
 
-  require('utils/events');
+  // require('../../utils/scripts/events.js');
 }
 
 elation.extend('hack.PeerServer', new function() {
@@ -41,7 +41,7 @@ elation.extend('hack.PeerServer', new function() {
   this.wsInit = function() {
     var WebSocketServer = ws.Server;
     var wss = this.wss = new WebSocketServer({ 
-      host: "meobets.com", 
+      host: "localhost", 
       port: 8087, 
       path: '/peer' 
     });
@@ -58,8 +58,8 @@ elation.extend('hack.PeerServer', new function() {
     })(this);
   }
 
-  this.wsConnect = function(ws) {
-    var address = ws.upgradeReq.client.remoteAddress;
+  this.wsConnect = function(ws, req) {
+    var address = req.socket.remoteAddress;
     console.log('[PeerServer] WS Connected: ', address);
 
     this.sockets[address] = ws;
@@ -103,27 +103,29 @@ elation.extend('hack.PeerServer', new function() {
 
 elation.extend('hack.TerminalServer', new function() {
   this.init = function() {
-    websockserver = this.websockserver = new ws.Server({ host: "meobets.com", port: 8086, path: '/terminal' });
+    websockserver = this.websockserver = new ws.Server({ host: "localhost", port: 8086, path: '/terminal' });
     websockserver.on('connection', elation.bind(this, this.connected));
     console.log('[TerminalServer] Listening for websockets');
   }
 
-  this.connected = function(websock) {
-    console.log('[TerminalServer] Connected: ', websock.upgradeReq.client.remoteAddress);
-    this.websock = websock;
-    websock.send('established.<br>');
+  this.connected = function(ws, req) {
+    console.log('[TerminalServer] Connected: ', req.socket.remoteAddress);
+    this.websock = ws;
+    ws.send('established.<br>');
     
     this.eof();
 
-    websock.on('message', elation.bind(this, this.message));
+    ws.on('message', elation.bind(this, this.message));
   }
 
   this.message = function(data, flags) {
-    console.log('[TerminalServer] Message: ', data);
-    var split = data.split(' '),
+    var message = data.toString("utf-8"); 
+
+        split = message.split(' '),
         command = split[0],
         websock = this.websock;
-
+    
+    console.log('[TerminalServer] Message: ', message);
     switch (command) {
       case "shit": 
         websock.send('right now the only command is "help" and it\'s not very helpful'); 

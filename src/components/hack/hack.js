@@ -8,7 +8,7 @@ if (typeof require != 'undefined') {
 
 elation.extend("hack.terminal_server", function() {
   this.init = function() {
-    this.websockserver = new ws.Server({host: "meobets.com", port: 8086});
+    this.websockserver = new ws.Server({host: "localhost", port: 8086});
     this.websockserver.on('connection', elation.bind(this, this.connected));
   }
   this.connected = function(websock) {

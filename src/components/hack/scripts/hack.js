@@ -11,7 +11,7 @@ elation.require([
     this.defaultcontainer = {tag: 'ul', classname: 'ws_users'};
     this.init = function() {
       this.ws = elation.network.WebSocket({
-        host: 'meobets.com',
+        host: 'localhost',
         port: 8087,
         path: 'peer',
         events: {
@@ -271,7 +271,7 @@ elation.require([
 
       this.webrtc = elation.network.WebRTC({
         id: this.id,
-        host: 'meobets.com',
+        host: 'localhost',
         port: 8088, 
         path: '/peer',
         events: {
@@ -626,7 +626,7 @@ elation.require([
     this.init = function() {
       this.message({data:'Connecting... '})
       elation.events.add(this.container, 'click', this);
-      this.connection = new WebSocket('ws://meobets.com:8086/terminal');
+      this.connection = new WebSocket('ws://localhost:8086/terminal');
       this.connection.onmessage = elation.bind(this, this.message);
 
       (function(self) {

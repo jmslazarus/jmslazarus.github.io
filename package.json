@@ -15,8 +15,11 @@
   "type": "commonjs",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/hack-server.js"
   },
-  "devDependencies": {
+  "dependencies": {
+    "peer": "^1.0.2",
+    "ws": "^8.18.0"
   }
 }
