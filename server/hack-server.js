@@ -4,6 +4,8 @@ if (typeof require != 'undefined') {
       net = require('net'),
       fs = require('fs'),
       peer = require('peer');
+      // https = require('https');
+
 
   // require('../../utils/scripts/events.js');
 }
@@ -98,12 +100,18 @@ elation.extend('hack.PeerServer', new function() {
     }
   }
 
-  this.init();
+  //this.init();
 });
 
 elation.extend('hack.TerminalServer', new function() {
   this.init = function() {
     websockserver = this.websockserver = new ws.Server({ 
+      // server: https.createServer({
+      //   key: fs.readFileSync('key.pem'),
+      //   cert: fs.readFileSync('cert.pem')
+      // }),
+      host: "localhost",
+      port: 8086,
       path: '/terminal'
     });
     websockserver.on('connection', elation.bind(this, this.connected));
