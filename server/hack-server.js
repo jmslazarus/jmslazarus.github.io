@@ -110,7 +110,7 @@ elation.extend('hack.TerminalServer', new function() {
       //   key: fs.readFileSync('key.pem'),
       //   cert: fs.readFileSync('cert.pem')
       // }),
-      host: "localhost",
+      host: "https://jlazarus.vercel.app",
       port: 8086,
       path: '/terminal'
     });
