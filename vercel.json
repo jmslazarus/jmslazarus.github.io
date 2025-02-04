@@ -3,7 +3,7 @@
     "name": "jmslazarus.github.io",
     "builds": [
         {
-            "src": "server/hack-server",
+            "src": "server/hack",
             "use": "@vercel/node"
         },
         {
