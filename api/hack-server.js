@@ -110,7 +110,7 @@ elation.extend('hack.TerminalServer', new function() {
       //   cert: fs.readFileSync('cert.pem')
       // }),
       port: 443,
-      path: '/terminal'
+      path: '/api/terminal'
     });
     websockserver.on('connection', elation.bind(this, this.connected));
     console.log('[TerminalServer] Listening for websockets');
