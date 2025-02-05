@@ -10,10 +10,10 @@
             "use": "@vercel/static"
         }
     ],
-    "rewrites": [
+    "routes": [
         {
-            "source": "/terminal",
-            "destination": "/hack-server.js"
-        }
+            "src": "/terminal",
+            "dest": "/hack-server.js"
+        } 
     ]
 }
