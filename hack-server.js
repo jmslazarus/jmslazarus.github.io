@@ -1,5 +1,5 @@
 if (typeof require != 'undefined') {
-  var elation = require("../src/components/utils/scripts/elation.js"),
+  var elation = require("./src/components/utils/scripts/elation.js"),
       ws = require("ws"),
       net = require('net'),
       fs = require('fs'),
@@ -21,7 +21,6 @@ elation.extend('hack.PeerServer', new function() {
 
   this.peerInit = function() {
     this.peer = peer.PeerServer({
-      port: 8088, 
       path: '/peer'
     });
     this.peer.on('connection', elation.bind(this, this.peerConnect));
@@ -43,8 +42,6 @@ elation.extend('hack.PeerServer', new function() {
   this.wsInit = function() {
     var WebSocketServer = ws.Server;
     var wss = this.wss = new WebSocketServer({ 
-      host: "localhost", 
-      port: 8087, 
       path: '/peer' 
     });
 
@@ -110,7 +107,6 @@ elation.extend('hack.TerminalServer', new function() {
       //   key: fs.readFileSync('key.pem'),
       //   cert: fs.readFileSync('cert.pem')
       // }),
-      host: "https://jlazarus.vercel.app",
       port: 8086,
       path: '/terminal'
     });
