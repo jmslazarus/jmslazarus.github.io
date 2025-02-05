@@ -14,11 +14,6 @@
         {
             "src": "/terminal/(.*)",
             "dest": "/hack-server.js"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/"
-        }
- 
+        } 
     ]
 }
