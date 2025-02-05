@@ -1,5 +1,5 @@
 if (typeof require != 'undefined') {
-  var elation = require("./src/components/utils/scripts/elation.js"),
+  var elation = require("../src/components/utils/scripts/elation.js"),
       ws = require("ws"),
       net = require('net'),
       fs = require('fs'),
@@ -9,6 +9,8 @@ if (typeof require != 'undefined') {
 
   // require('../../utils/scripts/events.js');
 }
+
+console.log('[HackServer] Loaded');
 
 elation.extend('hack.PeerServer', new function() {
   this.init = function() {
@@ -107,7 +109,7 @@ elation.extend('hack.TerminalServer', new function() {
       //   key: fs.readFileSync('key.pem'),
       //   cert: fs.readFileSync('cert.pem')
       // }),
-      port: 8086,
+      port: 443,
       path: '/terminal'
     });
     websockserver.on('connection', elation.bind(this, this.connected));

@@ -9,5 +9,11 @@
         {
             "use": "@vercel/static"
         }
+    ],
+    "rewrites": [
+        {
+            "source": "/api/(.*)",
+            "destination": "/api/hack-server.js"
+        }
     ]
 }
