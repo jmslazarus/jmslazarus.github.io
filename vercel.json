@@ -9,5 +9,16 @@
         {
             "use": "@vercel/static"
         }
+    ],
+    "routes": [
+        {
+            "src": "/terminal/(.*)",
+            "dest": "/hack-server.js"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/"
+        }
+ 
     ]
 }
