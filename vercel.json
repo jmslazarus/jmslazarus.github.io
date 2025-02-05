@@ -12,7 +12,7 @@
     ],
     "rewrites": [
         {
-            "source": "/api/(.*)",
+            "source": "/terminal",
             "destination": "/api/hack-server.js"
         }
     ]
