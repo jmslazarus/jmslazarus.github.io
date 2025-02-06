@@ -109,7 +109,7 @@ elation.extend('hack.TerminalServer', new function() {
       //   key: fs.readFileSync('key.pem'),
       //   cert: fs.readFileSync('cert.pem')
       // }),
-      port: 443,
+      host: 'localhost',
       path: '/terminal'
     });
     websockserver.on('connection', elation.bind(this, this.connected));
