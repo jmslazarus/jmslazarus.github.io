@@ -626,7 +626,7 @@ elation.require([
     this.init = function() {
       this.message({data:'Connecting... '})
       elation.events.add(this.container, 'click', this);
-      this.connection = new WebSocket('wss://jlazarus-api.vercel.app:80/terminal');
+      this.connection = new WebSocket('wss://jlazarus-api.vercel.app:443/terminal');
       this.connection.onmessage = elation.bind(this, this.message);
 
       (function(self) {
