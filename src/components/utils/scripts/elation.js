@@ -213,10 +213,11 @@ elation.extend("component", new function() {
     if (!elation.env.isBrowser) return;
     // Find all elements which have a data-elation-component attribute
     var elements = elation.find('[data-elation-component]');
-
+    console.log('-!- component add', elements);
     for (var i = 0; i < elements.length; i++) {
       var element = elements[i];
       var componentid = this.parseid(element);
+      console.log('-!- componentid', componentid);
       if (componentid.type) {
         var componentinitialized = element.dataset['elationInitialized'] || false;
         if (!componentinitialized) { 
@@ -345,7 +346,8 @@ elation.extend("component", new function() {
     var componentclass = elation.utils.arrayget(elation, type);
     if (typeof componentclass == 'function') {
       var instance = componentclass.call(componentclass, id, container, args, events);
-    } 
+      return instance;
+    }
     //console.error("elation: tried to instantiate unknown component type '" + type + "', id '" + id + "'");
   }
   this.get = function(id, type, container, args, events) {

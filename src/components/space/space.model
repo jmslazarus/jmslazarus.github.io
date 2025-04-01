@@ -1,0 +1,59 @@
+{
+  "name":"space",
+  "classes":{
+    "ThingType":{
+      "table":"spacecraft.thing_types",
+      "props":{
+        "type":        ["type", "string", {"pk":true, "notnull":true}],
+        "property":    ["property", "string", {"pk":true, "notnull": true}],
+        "propertykey": ["propertykey", "string", {"pk":true, "notnull": true}],
+        "propertytype":["propertytype", "string", {"notnull": true}],
+        "value":       ["value", "int64", {"notnull": true}]
+      },
+      "associations":[
+        ["many-to-one", "Thing", {"key":"type"}]
+      ]
+    },
+    "Thing":{
+      "table":"spacecraft.things",
+      "props":{
+        "parentname": ["parentname", "string", {"pk": true, "default":""}],
+        "name":       ["name", "string", {"pk": true, "default":""}],
+        "type":       ["type", "string", {"notnull":true}],
+        "quantity":   ["quantity", "int64", {"notnull":true, "default": 0}]
+      },
+      "associations":[
+        ["one-to-many", "ThingType", {"key":"type"}],
+        ["one-to-many", "ThingProperty", {"key":"parentname,name"}],
+        ["one-to-many", "ThingLink", {"key":"parentname,name"}]
+      ]
+    },
+    "ThingProperty":{
+      "table":"spacecraft.thing_properties",
+      "plural":"ThingProperties",
+      "props":{
+        "parentname":  ["parentname", "string", {"pk": true}],
+        "name":        ["name", "string", {"pk": true}],
+        "property":    ["property", "string", {"pk": true, "notnull": true}],
+        "propertykey": ["propertykey", "string", {"pk": true, "notnull": true}],
+        "propertytype":["propertytype", "string", {"notnull": true}],
+        "value":       ["value", "string", {"notnull": true}]
+      },
+      "associations":[
+        ["many-to-one", "Thing", {"key":"parentname,name"}]
+      ]
+    },
+    "ThingLink":{
+      "table":"spacecraft.thing_links",
+      "props":{
+        "parentname": ["parentname", "string", {"pk": true, "default":""}],
+        "name":       ["name", "string", {"pk": true, "notnull":true}],
+        "linkto":     ["linkto", "string", {"pk": true, "notnull":true}],
+        "linktype":   ["linktype", "string", {"notnull":true}]
+      },
+      "associations":[
+        ["many-to-one", "Thing", {"key":"parentname,name"}]
+      ]
+    }
+  }
+}
