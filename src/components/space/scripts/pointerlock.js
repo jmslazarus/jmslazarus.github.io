@@ -9,6 +9,11 @@ elation.extend('pointerlock', function(controls) {
     elation.events.add(document, 'pointerlockchange,mozpointerlockchange,webkitpointerlockchange', this);
     
     elation.html.addclass(document.body, 'show_interface');
+    this.sound = elation.utils.sound.system;
+    // this.sound.load(`unknownsample`,`src/components/space/sounds/unknownsample2.wav`, (buffer) => {
+    //   console.log('-!- Audio.Loaded: song', 'unknownsample')
+    //   this.sound.loop('unknownsample');
+    // });
   }
   
   this.click = function(element) {
@@ -40,9 +45,20 @@ elation.extend('pointerlock', function(controls) {
   this.pointerlockchange = function(event) {
     if (document.pointerLockElement === this.container || document.mozPointerLockElement === this.container || document.webkitPointerLockElement === this.container) {
       this.locked = true;
+      // this.sound.loop('unknownsample');
+      this.sound.loop('engine');
+      this.sound.loop('powerplant');
+      this.sound.loop('radar');
+      this.parent.rendering = true;
+      this.parent.loop();
       elation.html.removeclass(document.body, 'show_interface');
     } else {
       this.locked = false;
+      // this.sound.pause('unknownsample');
+      this.sound.pause('engine');
+      this.sound.pause('powerplant');
+      this.sound.pause('radar');
+      this.parent.rendering = false;
       elation.html.addclass(document.body, 'show_interface');
     }
     
@@ -56,6 +72,9 @@ elation.extend('pointerlock', function(controls) {
     this.controls.pointerlock = this.locked;
     //this.parent.haltrendering = this.locked;
     this.mainmenu.toggle(this.locked);
+    event.preventDefault();
+    event.cancelBubble = true;
+    event.stopPropagation();
   }
   
   this.handleEvent = function(event) {

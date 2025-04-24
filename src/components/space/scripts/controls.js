@@ -66,7 +66,6 @@
  *       "gamepad_0_button_1": "jump"
  *     });
  **/
-console.log('####### CONTROLS LOADED')
 elation.component.add("space.controls", {
   contexts: {},
   activecontexts: [],
@@ -78,7 +77,6 @@ elation.component.add("space.controls", {
   viewport: [],
 
   init: function() {
-    console.log('####### CONTROLS INIT')
     this.cursor = elation.html.create({
       tag:'img',
       style: { 'position':'fixed', 'margin-top':'-16px', 'margin-left':'-16px', 'width':'32px', 'height':'32px', 'opacity':.6 },

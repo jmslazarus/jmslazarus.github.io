@@ -9,8 +9,6 @@ elation.extend("space.meshes.ship", function(args) {
   ];
   
   this.postinit = function() {
-    console.log('@@@ SHIP POSTINIT', args);
-    
     /*
     this.controller = elation.space.starbinger(0);
     var args = this.args;

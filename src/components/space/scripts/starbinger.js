@@ -120,7 +120,7 @@ var args = {
           },
           {
             "parentname": "/Starbinger/Sector 002",
-            "name": "shuttle_2",
+            "name": "Shuttle",
             "type": "ship",
             "quantity": 1,
             "properties": {
@@ -130,7 +130,7 @@ var args = {
                 "exists": 1
               },
               "physical": {
-                "label": "Shuttle Type-II",
+                "label": "Light Shuttle",
                 "rotation": [0,0,0],
                 "scale": [3.5,3.5,3.5],
                 "position": [4500,2315,167600]
@@ -140,7 +140,7 @@ var args = {
           },
           {
             "parentname": "/Starbinger/Sector 002",
-            "name": "Outpost",
+            "name": "Outpost Station",
             "type": "station",
             "quantity": 1,
             "properties": {
@@ -160,12 +160,12 @@ var args = {
           },
           {
             "parentname": "/Starbinger/Sector 002",
-            "name": "DireCoyote",
+            "name": "Fighter",
             "type": "ship",
             "quantity": 1,
             "properties": {
               "physical": {
-                "label": "Light Fighter",
+                "label": "Medium Fighter",
                 "exists": 1,
                 "rotation": [0,0,0],
                 "scale": [5,5,5],
@@ -182,12 +182,12 @@ var args = {
           },
           {
             "parentname": "/Starbinger/Sector 002",
-            "name": "Aslan",
+            "name": "Shuttle",
             "type": "ship",
             "quantity": 1,
             "properties": {
               "physical": {
-                "label": "Bucky Pod",
+                "label": "Utility Pod",
                 "exists": 1,
                 "scale": [1,1,1],
                 "rotation": [0,0,0],
@@ -202,12 +202,12 @@ var args = {
           },
           {
             "parentname": "/Starbinger/Sector 002",
-            "name": "Rock City",
+            "name": "Rock Colony",
             "type": "station",
             "quantity": 1,
             "properties": {
               "physical": {
-                "scale": [550,550,550],
+                "scale": [600,600,600],
                 "position": [20000,-20000,130000]
               },
               "render": {
@@ -289,17 +289,18 @@ elation.component.add('space.starbinger', {
   materials: {},
   objects_array: [],
   objects: {},
-  haltrendering: false,
+  rendering: true,
   camerapos: new THREE.Vector3(0,0,0),
   camnewpos: new THREE.Vector3(0,0,0),
 
   init: function() {
     // args.sector = args.sector.things[0];
     this.args = args;
-    this.dustCount = 5000;
-    this.dustDiameter = 2200;
-    this.dustRadius = this.dustDiameter / 2;
-    this.dustSize = 2;
+    this.dustCount = 50000;
+    this.dustFieldMaximum = 8000;
+    this.dustFieldMinimum = 333;
+    this.dustFieldRadius = this.dustFieldMaximum / 2;
+    this.dustSize = 6;
     
     elation.space.controller = this;
     this.viewsize = this.getsize();
@@ -340,6 +341,7 @@ elation.component.add('space.starbinger', {
 
     elation.ui.hud.init(HUD, this);
     
+    this.collisionSystem = new CollisionSystem();
     this.addObjects(this.args.sector, this.scene);
 
     if (this.container) {
@@ -361,11 +363,13 @@ elation.component.add('space.starbinger', {
 
     this.lastupdate = new Date().getTime();
     this.loop();
+
     if (elation.utils.physics) {
       elation.utils.physics.system.setController(this);
-      setTimeout(function() { 
+      setTimeout(() => { 
         elation.utils.physics.system.start();
         //elation.ui.hud.target.list.nextTarget();
+        // this.addCollisionSystem(this);
       }, 500);
     }
     
@@ -375,7 +379,19 @@ elation.component.add('space.starbinger', {
     
     this.addSkybox();
     this.addDust();
-    
+    this.initSound();
+    this.initMOTD();
+  },
+  initSound: function() {
+    this.sound = elation.utils.sound.system;
+    this.sound.load(`hit`,`src/components/space/sounds/hit.wav`, (buffer) => {
+      console.log('-!- Audio.Loaded:', 'hit')
+    });
+    this.sound.load(`explode`,`src/components/space/sounds/explode.wav`, (buffer) => {
+      console.log('-!- Audio.Loaded:', 'explode')
+    });
+  },
+  initMOTD: function() {
     elation.ui.hud.console.log('');
     elation.ui.hud.console.log('Movement: <p>W</p>,<p>S</p> | Strafing: <p>A</p>,<p>D</p>,<p>R</p>,<p>F</p> | Rolling: <p>Q</p>,<p>E</p> | Targeting: <p>SCROLL</p>');
     elation.ui.hud.console.log('Fire: <p>Mouse0</p> | Afterburner: <p>X</p>,<p>Mouse2</p> | Boost: <p>Mouse1</p> | Brake: <p>SHIFT</p>');
@@ -411,7 +427,7 @@ elation.component.add('space.starbinger', {
     this.renderer.autoClear = false;
     this.cameraCube.useQuaternion = true;
   },
-  r: function(min, max) {
+  randomInRange: function(min, max) {
     var rand = Math.random(),
         value = (max - min) * rand + min;
     
@@ -436,12 +452,12 @@ elation.component.add('space.starbinger', {
     
     for (var p = 0; p < this.dustCount; p++) {
       var ppos = new THREE.Vector3(
-            this.camera.position.x + Math.random() * this.dustDiameter - this.dustRadius,
-            this.camera.position.y + Math.random() * this.dustDiameter - this.dustRadius,
-            this.camera.position.z + Math.random() * this.dustDiameter - this.dustRadius
+            this.camera.position.x + Math.random() * this.dustFieldMaximum - this.dustFieldRadius,
+            this.camera.position.y + Math.random() * this.dustFieldMaximum - this.dustFieldRadius,
+            this.camera.position.z + Math.random() * this.dustFieldMaximum - this.dustFieldRadius
           );
       
-      if (this.camera.position.distanceTo(ppos) <= this.dustRadius) {
+      if (this.camera.position.distanceTo(ppos) <= this.dustFieldRadius) {
         particle = new THREE.Vertex(ppos);
         this.dustParticles.vertices.push(particle);
       }
@@ -449,7 +465,7 @@ elation.component.add('space.starbinger', {
     
     for(var colors=[],i=0; i < this.dustParticles.vertices.length; i++) {
       colors[i] = new THREE.Color();
-      colors[i].setHSV(Math.random(), .4, 1);
+      colors[i].setHSV(Math.random(), .3, .75);
     }
     
     this.dustParticles.colors = colors;
@@ -460,12 +476,6 @@ elation.component.add('space.starbinger', {
   initControls: function() {
     this.controlsenabled = true;
     this.controls = elation.component.create(0, 'space.controls', this.renderer.domElement, this.args)
-    console.log('-!- starbinger initControls', this.controls)
-
-    // TODO - define some top-level bindings for accessing menus, etc
-    //this.controls.addContext("default", {}});
-    //this.controls.addBindings("default", {});
-    //this.controls.activateContext("default", this);
   },
   initRenderer: function() {
     this.renderer = (this.usewebgl ? new THREE.WebGLRenderer({ clearColor: 0x000000, clearAlpha: 1, antialias: true, maxShadows: 1000}) : new THREE.CanvasRenderer());
@@ -486,6 +496,10 @@ elation.component.add('space.starbinger', {
     return [window.innerWidth, window.innerHeight];
   },
   loop: function(ev) {
+    if (!this.rendering) {
+      return;
+    }
+    // deltaTime
     this.campos = new THREE.Vector3(
       this.camera.position.x,
       this.camera.position.y,
@@ -521,14 +535,16 @@ elation.component.add('space.starbinger', {
       while (pCount--) {
         particle = this.dustParticles.vertices[pCount];
         
-        if (particle && this.camera.position.distanceTo(particle.position) > this.dustRadius) {
+        if (
+          (particle && this.camera.position.distanceTo(particle.position) > this.dustFieldRadius) ||
+          (particle && this.camera.position.distanceTo(particle.position) < this.dustFieldMinimum / 2)
+        ) {
           particle.position = ship.matrixWorld.multiplyVector3(new THREE.Vector3(
-            Math.random() * this.dustDiameter - this.dustRadius,
-            Math.random() * this.dustDiameter - this.dustRadius,
-            Math.random() * this.dustDiameter - this.dustRadius
+            Math.random() * this.dustFieldMaximum - this.dustFieldRadius,
+            Math.random() * this.dustFieldMaximum - this.dustFieldRadius,
+            Math.random() * this.dustFieldMaximum - this.dustFieldRadius
           ));
           
-          particle.color = '0xFFAA00';
         }
       }
       
@@ -558,16 +574,10 @@ elation.component.add('space.starbinger', {
 
     this.stats.update();
     this.lastupdate = ts;
-    this.camnewpos = new THREE.Vector3(
-      this.camera.position.x,
-      this.camera.position.y,
-      this.camera.position.z
-    );
-    var diff = this.camvector = new THREE.Vector3(
-      this.campos.x - this.camnewpos.x,
-      this.campos.y - this.camnewpos.y,
-      this.campos.z - this.camnewpos.z
-    );
+
+    if (this.collisionSystem) {
+      this.collisionSystem.update(this.lastupdatedelta);
+    }
   },
   clearScene: function(root) {
     root = root || this.scene;
@@ -633,7 +643,7 @@ elation.component.add('space.starbinger', {
   },
   createAdminTool: function() {
     var div = elation.html.create({tag: 'div', classname: "space_world_admin"});
-    var component = elation.space.admin("admin", div, { controller: this });
+    // var component = elation.space.admin("admin", div, { controller: this });
     this.container.appendChild(div);
   }
 });

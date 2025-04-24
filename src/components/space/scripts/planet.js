@@ -22,7 +22,7 @@ elation.extend("space.meshes.planet", function(args, controller) {
       transparent: false, 
       depthWrite: false,
       depthTest: true,
-      specular: 0x050202,
+      specular: 0x000000,
       color: 0xFFFFFF,
       shininess: 0,
       opacity: 1

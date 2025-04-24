@@ -68,7 +68,6 @@ elation.extend("space.meshes.spaceship", function(args) {
         loader.load( { model: mesh, callback: function(geometry) { 
           geometry.computeVertexNormals();
           self.loadMesh(geometry); 
-          console.log('@@@ LOADED MODEL', mesh, geometry); } });
       })(this, this.properties.render.mesh);
     }
   }

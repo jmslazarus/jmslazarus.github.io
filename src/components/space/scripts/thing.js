@@ -16,7 +16,7 @@ elation.extend("space.thing", function(args, obj) {
     this.name = this.args.name;
     this.parentname = this.args.parentname;
     this.type = this.args.type;
-console.log('-!- thing init', this.name, this.args)
+    console.log('-!- thing init', this.name, this)
     if (typeof this.preinit == 'function') {
       this.preinit();
     }
@@ -24,7 +24,7 @@ console.log('-!- thing init', this.name, this.args)
     if (!this.properties.physical) {
       this.properties.physical = {};
     }
-    if (this.properties.physical.exists === 0) 
+    if (typeof this.properties.physical.exists !== undefined && this.properties.physical.exists === 0) 
       return;
     if (!this.mass) {
       this.mass = elation.utils.arrayget(this.properties, "physical.mass", 1);
@@ -65,6 +65,10 @@ console.log('-!- thing init', this.name, this.args)
     if (typeof this.postinit == 'function') {
       this.postinit();
     }
+
+    console.log('thing created', this, this.controller, this.controller.collisionSystem);
+
+    this.controller?.collisionSystem?.register(this, (obj, norm) => this.controller.handleCollision.call(this, obj, norm))
   }
   this.setState = function(state, value) {
     this.state[state] = value;

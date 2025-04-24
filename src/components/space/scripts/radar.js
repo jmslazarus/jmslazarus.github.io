@@ -14,7 +14,6 @@ elation.extend('ui.widgets.radar3d', function(hud) {
   this.init = function() {
     !function(self) {
       self.particleTexture = THREE.ImageUtils.loadTexture("src/components/space/images/lensflare0.png", false, function() {
-        console.log('image loaded');
         self.megainit();
       });
     }(this);

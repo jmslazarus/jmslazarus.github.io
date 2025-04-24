@@ -345,33 +345,33 @@ class Component_space extends Component {
       'randoms'=> $rand . ', ' . $rand2
     );
     
-    // {
-    //   parentname: '/Starbinger/Sector 002',
-    //   name: 'Star',
-    //   type: 'star',
-    //   quantity: 1,
-    //   properties: {
-    //     'generated': {
-    //       'type': 'G4',
-    //       'seed': '0.434830',
-    //       'color': '0xfff7c0',
-    //       'temp': '6000',
-    //       'radius': '1.0',
-    //       'mass': '1.0',
-    //       'lum': '1.2',
-    //       'hzone': '1.1',
-    //       'lifetime': '15000',
-    //       'randoms': '60, 0.434830'
-    //     },
-    //     'physical': {
-    //       "position": [ 0, 0, -11570000 ],
-    //       "radius": '1.0'
-    //     },
-    //     'render': {
-    //       "color": '0xfff7c0'
-    //     }
-    //   }
-    // }
+    {
+      parentname: '/Starbinger/Sector 002',
+      name: 'Star',
+      type: 'star',
+      quantity: 1,
+      properties: {
+        'generated': {
+          'type': 'G4',
+          'seed': '0.434830',
+          'color': '0xfff7c0',
+          'temp': '6000',
+          'radius': '1.0',
+          'mass': '1.0',
+          'lum': '1.2',
+          'hzone': '1.1',
+          'lifetime': '15000',
+          'randoms': '60, 0.434830'
+        },
+        'physical': {
+          "position": [ 0, 0, -11570000 ],
+          "radius": '1.0'
+        },
+        'render': {
+          "color": '0xfff7c0'
+        }
+      }
+    }
     
     $vars["sector"]["things"]["Star"] = array(
       name=>'Star',

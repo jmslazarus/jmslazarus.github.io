@@ -16,6 +16,8 @@ elation.extend("space.meshes.roid", function(args) {
     //this.collisionradius = this.physical.radius;
     //console.log('roid',this.collisionradius);
     elation.space.geometry.get(this.render.mesh, this);
+
+    this.health = this.physical.scale.reduce((a,b) => { return a + b }, 1) / 3;
     /*
     (function(self, mesh) {
       var loader = new THREE.JSONLoader();
@@ -81,6 +83,16 @@ elation.extend("space.meshes.roid", function(args) {
     o[type][name].push(this.mesh);
   }
   
+  this.collision = function(asteroid, normal, other) {
+    console.log('collision', asteroid.health);
+    if (other.object.type !== 'player') {
+      if (!this.visible) return;
+      // if (this.health) this.health -= 10;
+      // if (this.health <= 0) 
+        this.explode(asteroid);
+    }
+  }
+
   this.renderframe_start = function(ev) {
     if (!this.mesh)
       return;
@@ -95,6 +107,51 @@ elation.extend("space.meshes.roid", function(args) {
     
     mesh.rotation.z += speed;
     mesh.rotation.y += -speed*1.5;
+  }
+
+  this.explode = function(asteroid) {
+    // this.createExplosion();
+    // createFlash(asteroid.position);
+    this.playExplosionSound();
+    // fragmentAsteroid(asteroid);
+  }
+
+  this.createExplosion = function(position) {
+    var particles = [];
+    var particleCount = 1000;
+    var particleSystem;
+
+    var geometry = new THREE.Geometry();
+    var material = new THREE.ParticleBasicMaterial({
+        color: 0xffffff,
+        size: 0.1
+    });
+
+    for (var i = 0; i < particleCount; i++) {
+        var particle = new THREE.Vector3(
+            this.mesh.position.x + (Math.random() - 0.5) * 2, // Random X
+            this.mesh.position.x + (Math.random() - 0.5) * 2, // Random Y
+            this.mesh.position.x + (Math.random() - 0.5) * 2  // Random Z
+        );
+        particle.velocity = new THREE.Vector3(
+            (Math.random() - 0.5) * 0.1, // Random velocity X
+            (Math.random() - 0.5) * 0.1, // Random velocity Y
+            (Math.random() - 0.5) * 0.1  // Random velocity Z
+        );
+        particles.push(particle);
+        geometry.vertices.push(particle);
+    }
+
+    particleSystem = new THREE.ParticleSystem(geometry, material);
+    this.controller.scene.add(particleSystem);
+  }
+
+  this.playExplosionSound = function() {
+    this.controller.sound.load(`explode`,`src/components/space/sounds/explode.wav`, (buffer) => {
+      this.controller.sound.play('explode');
+      this.controller.scene.remove(this.mesh);
+      this.visible = false;
+    })
   }
   
   this.init();

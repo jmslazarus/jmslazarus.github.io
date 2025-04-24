@@ -133,7 +133,7 @@ elation.extend('space.equipment.guns', new function(name) {
     ammo:-1,
     energy:75,
     size:1.8,
-    speed:3300,
+    speed:3000,
     delay:.25,
     flash:{duration:300,color:0x00FF44,position_y:-.02,position_z:2.2},
     light:{duration:250,color:0x66FFAA,radius:85,position_z:3},
@@ -144,9 +144,9 @@ elation.extend('space.equipment.guns', new function(name) {
     recoil:0,
     rotation:(Math.PI/10),
     ammo:300,
-    energy:25,
+    energy:25,//this is a test
     size:.4,
-    speed:2800,
+    speed:3000,
     delay:.15,
     winddown: 1000,
     flash:{duration:200,color:0xFFFFFF,size:0.01,position_z:2.2,image:'muzzleflash0'},
@@ -171,6 +171,9 @@ elation.extend('space.equipment.gun', function(name, container, hardpoint) {
         get = elation.utils.arrayget;
     
     console.log('-!- Equipment.Gun: Initialized', name, options);
+    this.label = name.toLowerCase();
+    this.sound = elation.utils.sound.system;
+    this.sound.load(`${this.label}-fire`,`src/components/space/sounds/${this.label}.wav`, (buffer) => console.log('-!- Audio.Loaded: sound', this.label, buffer));
     this.controller = this.parent.controller;
     this.camera = this.controller.camera;
     this.delay = options.delay || 1;
@@ -221,6 +224,9 @@ elation.extend('space.equipment.gun', function(name, container, hardpoint) {
   this.makeBullets = function() {
     for (var i=this.bullet_count; i>0; i--) {
       var bullet = new elation.space.meshes.turret_bullet({ 
+        name: this.label + '_bullet_' + i,
+        type: 'projectile',
+        controller: this.controller,
         radius: 1, 
         mass: 1, 
         position: new THREE.Vector3(0,0,0), 
@@ -254,7 +260,10 @@ elation.extend('space.equipment.gun', function(name, container, hardpoint) {
                           .addSelf(ship.dynamics.vel),
         bullet = this.getBullet();
     
+    this.sound.play(`${this.label}-fire`);
+
     bullet.fire({ 
+      visible: true,
       radius: 1, 
       mass: 1, 
       position: this.weapon.matrixWorld.getPosition(), 
@@ -319,71 +328,19 @@ elation.extend('space.equipment.gun', function(name, container, hardpoint) {
       if (light) 
         light.intensity = li;
     }
-    
-    return;
-    var p = this.position;
-    //this.projectileSystem.position.set(c.x, c.y, c.z).addSelf(new THREE.Vector3(0,0,-10));
-      this.projectileSystem.position = this.camera.matrixWorld.multiplyVector3(new THREE.Vector3(
-        p[0],
-        p[1],
-        p[2]
-      ));
-    
-    if (this.parent.firing) {
-      if (this.i > this.projectiles.length-1)
-        this.i = 0;
-      
-      var particle = this.projectiles[this.i];
-      
-      particle.moving = true;
-      
-      this.i++;
-    }
-    
-    for (var i=0; i<this.projectiles.length; i++) {
-      var particle = this.projectiles[i];
-      
-      if (particle.moving) {
-        var pos = this.projectileSystem.position,
-            par = particle.position,
-            v = new THREE.Vector3(
-              par.x + pos.x, 
-              par.y + pos.y,
-              par.z + pos.z
-            );
-        if (particle && pos.distanceTo(v) < 2400) {
-        console.log('FIRING', this.i, i, particle.moving, this.projectileSystem.position.distanceTo(par), pos, par);
-          particle.position = this.camera.matrixWorld.multiplyVector3(new THREE.Vector3(0,0,-10));
-        } else {
-          particle.moving = false;
-          particle.position.set(0,0,0);
-        }
-      }
-    }
-  }
-  
-  this.makeSphere = function(width, coords, material, cols, rows) {
-    var geometry = new THREE.SphereGeometry(width, cols || 4, rows || 2);
-    var sphere = new THREE.Mesh(geometry, material);
-    
-    sphere.position.x = coords[0];
-    sphere.position.y = coords[1];
-    sphere.position.z = coords[2];
-    
-    return sphere;
   }
   
   this.makeWeapon = function() {
     this.weapon = weapon = new THREE.Object3D();
-    this.parent.add(weapon);
     
     weapon.position.x = this.position[0];
     weapon.position.y = this.position[1];
     weapon.position.z = this.position[2];
-
+    
+    this.parent.add(weapon);
     elation.space.geometry.get('src/components/space/media/models/'+this.model+'.js', this);
     if (this.bullet_model)
-      elation.space.geometry.get('src/components/space/media/models/'+this.bullet_model+'.js', this, 'loadMesh2');
+      elation.space.geometry.get('src/components/space/media/models/'+this.bullet_model+'.js', this, 'loadBulletMesh');
     else
       this.makeBullets();
 
@@ -421,7 +378,7 @@ elation.extend('space.equipment.gun', function(name, container, hardpoint) {
     //this.updateCollisionSize();
   }
 
-  this.loadMesh2 = function(geometry) {
+  this.loadBulletMesh = function(geometry) {
     this.bullet_material = elation.space.materials.getMaterial('massdriver_bullet_'+this.color, new THREE.MeshBasicMaterial({
       map: 'src/components/space/images/star2.jpg', 
       color: this.color
@@ -552,6 +509,10 @@ elation.extend('space.equipment.gun', function(name, container, hardpoint) {
 });
 
 elation.extend("space.meshes.turret_bullet", function(args) {
+  this.controller = args.controller || false;
+  this.visible = args.visible || false
+  this.name = args.name || 'bullet';
+  this.type = args.type || 'projectile';
   elation.space.thing.call(this, args);
 
   this.postinit = function() {
@@ -564,6 +525,7 @@ elation.extend("space.meshes.turret_bullet", function(args) {
   }
   
   this.fire = function(args) {
+    this.controller.scene.add(this);
     this.position.copy(args.position);
     this.dynamics.setVelocity(args.direction);
     
@@ -616,6 +578,14 @@ elation.extend("space.meshes.turret_bullet", function(args) {
     }
     */
   }
+
+  this.collision = function(object, normal, other) {
+    // console.log('Collision detected with bullet:', object.name, object, normal, other);
+    elation.utils.sound.system.play('hit');
+    this.visible = false;
+    this.position.set(0,0,0);
+  }
+
   this.cleanup2 = function() {
     //this.scene.remove(this.projectileSystem);
   }
@@ -623,8 +593,7 @@ elation.extend("space.meshes.turret_bullet", function(args) {
     this.dynamics.setVelocity(new THREE.Vector3(0,0,0));
     this.position.set(0,0,0);
     this.visible = false;
-
-    //this.scene.remove(this);
+    this.controller.scene.remove(this);
   }
   
   this.init();

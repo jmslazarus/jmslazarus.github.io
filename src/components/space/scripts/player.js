@@ -25,12 +25,11 @@ elation.extend("space.meshes.player", function(args) {
   this.weapons = [];
   this.expose = [ 'id', 'position', 'rotation' ];
   this.hardpoints = [ [-6,-1,-7], [-3.5,-3,-6], [3.5,-3,-6], [6,-1,-7] ];
-  
+
   this.postinit = function() {
     this.useQuaternion = true;
 
     this.controller = elation.space.starbinger(0);
-    console.log(this.controller)
     this.camera = this.controller.camera;
     
     var pos = this.get(args, 'properties.physical.position');
@@ -67,9 +66,64 @@ elation.extend("space.meshes.player", function(args) {
     }
     
     this.setWeapons();
+    // this.change_fire_mode(1);
     
     this.ship_status = new elation.ui.widgets.ship_status(this, { center: [ 0, .8, -4.7 ], scale: 0.03 });
     //this.target_status = new elation.ui.widgets.target_status(this);
+
+    this.sound = elation.utils.sound.system;
+    this.sound.load(`beep`,`src/components/space/sounds/beep.wav`, (buffer) => {
+      console.log('-!- Audio.Loaded: song', 'beep')
+    })
+    this.sound.load(`beep2`,`src/components/space/sounds/beep2.wav`, (buffer) => {
+      console.log('-!- Audio.Loaded: song', 'beep2')
+    })
+    this.sound.load(`afterburner`,`src/components/space/sounds/afterburner.wav`, (buffer) => {
+      console.log('-!- Audio.Loaded: song', 'afterburner')
+    })
+    this.sound.load(`boost_up`,`src/components/space/sounds/boost_up.wav`, (buffer) => {
+      console.log('-!- Audio.Loaded: song', 'boost_up')
+    })
+    this.sound.load(`boost_down`,`src/components/space/sounds/boost_down.wav`, (buffer) => {
+      console.log('-!- Audio.Loaded: song', 'boost_down')
+    })
+    this.sound.load(`brake`,`src/components/space/sounds/brake.wav`, (buffer) => {
+      console.log('-!- Audio.Loaded: song', 'brake')
+      this.sound.get('brake').setVolume(0.5);
+    })
+    this.sound.load(`thruster`,`src/components/space/sounds/hum.wav`, (buffer) => {
+      console.log('-!- Audio.Loaded: song', 'thruster')
+    });
+    this.sound.load(`engine`,`src/components/space/sounds/hum.wav`, (buffer) => {
+      this.sound.loop('engine');
+      console.log('-!- Audio.Loaded: song', 'engine')
+    });
+    this.sound.load(`powerplant`,`src/components/space/sounds/hum1.wav`, (buffer) => {
+      this.sound.loop('powerplant');
+      console.log('-!- Audio.Loaded: song', 'powerplant')
+      this.sound.get('powerplant').setVolume(0.3);
+    });
+    this.sound.load(`radar`,`src/components/space/sounds/radar.wav`, (buffer) => {
+      console.log('-!- Audio.Loaded: song', 'radar')
+      this.sound.loop('radar');
+      this.sound.get('radar').setVolume(0.1);
+    })
+  }
+
+  this.collision = function(object, normal) {
+    // Reflect the player's velocity using the normal
+    const velocity = new THREE.Vector3(object.dynamics.vel.x, object.dynamics.vel.y, object.dynamics.vel.z)
+    const dot = velocity.dot(normal);
+    const reflectedVelocity = new THREE.Vector3(
+        velocity.x - 2 * dot * normal.x,
+        velocity.y - 2 * dot * normal.y,
+        velocity.z - 2 * dot * normal.z
+    );
+
+    // Apply the reflected velocity to the player
+    object.throttle = 0;
+    object.dynamics.removeForce("thrusters");
+    object.dynamics.setVelocity(reflectedVelocity.multiplyScalar(1)); // Optionally dampen the bounce
   }
   
   this.setWeapons = function() {
@@ -289,6 +343,7 @@ elation.extend("space.meshes.player", function(args) {
   }
   
   this.updateMovementVector = function() {
+    this.sound.get('engine')?.setVolume(this.throttle);
       if (this.throttle > 0)
         this.moveState.forward = 1;
       else
@@ -377,6 +432,7 @@ elation.extend("space.meshes.player", function(args) {
   }
   
   this.fire_primary = function(event) {
+    // if (!this.pointerlock.locked) return;
     this.firing = (event > 0 ? true : false);
   }
   
@@ -433,12 +489,39 @@ elation.extend("space.meshes.player", function(args) {
     this.controls = elation.space.controls(0);
     
     this.controls.addContext("spaceship", {
-      'move_up': function(ev) { this.moveState.up = ev.value; },
-      'move_down': function(ev) { this.moveState.down = ev.value; },
-      'move_left': function(ev) { this.moveState.left = ev.value; },
-      'move_right': function(ev) { this.moveState.right = ev.value; },
-      'move_burner': function(ev) { this.burner_on = ev.value; },
-      'move_booster': function(ev) { this.booster_on = ev.value; },
+      'move_up': function(ev) { 
+        console.log(ev);
+        if (ev.value) this.sound.loop('thruster');
+        if (!ev.value) this.sound.stop('thruster');
+        this.moveState.up = ev.value; 
+      },
+      'move_down': function(ev) { 
+        if (ev.value) this.sound.loop('thruster');
+        if (!ev.value) this.sound.stop('thruster');
+        this.moveState.down = ev.value; 
+      },
+      'move_left': function(ev) { 
+        if (ev.value) this.sound.loop('thruster');
+        if (!ev.value) this.sound.stop('thruster');
+        this.moveState.left = ev.value; 
+      },
+      'move_right': function(ev) { 
+        if (ev.value) this.sound.loop('thruster');
+        if (!ev.value) this.sound.stop('thruster');
+        this.moveState.right = ev.value; 
+      },
+      'move_burner': function(ev) { 
+        if (ev.value) this.sound.play('boost_up');
+        if (!ev.value) {
+          this.sound.stop('boost_up');
+          this.sound.play('boost_down');
+        }
+        this.burner_on = ev.value; 
+      },
+      'move_booster': function(ev) { 
+        if (ev.value) this.sound.play('afterburner');
+        this.booster_on = ev.value; d
+      },
       'move_forward': function(ev) { this.moveState.forward = ev.value; },
       'move_backward': function(ev) { this.moveState.back = ev.value; },
       'roll_left': function(ev) { this.moveState.rollLeft = ev.value; },
@@ -450,16 +533,49 @@ elation.extend("space.meshes.player", function(args) {
       'forward': function(ev) { this.forward(ev.value); },
       'reverse': function(ev) { this.reverse(ev.value); },
       'fire_primary': function(ev) { this.fire_primary(ev.value); },
-      'throttle_mode': function(ev) { this.change_throttle_mode(ev.value); },
-      'braking_thrusters': function(ev) { this.braking_thrusters(ev.value); },
-      'wheel_target': function(ev) { this.mwheel(ev); },
-      'next_target': function(ev) { this.next_target(ev.value); },
-      'prev_target': function(ev) { this.prev_target(ev.value); },
-      'change_gun_1': function(ev) { this.change_gun(ev.value, 0); },
-      'change_gun_2': function(ev) { this.change_gun(ev.value, 1); },
-      'change_gun_3': function(ev) { this.change_gun(ev.value, 2); },
-      'change_gun_4': function(ev) { this.change_gun(ev.value, 3); },
-      'fire_mode': function(ev) { this.change_fire_mode(ev.value); }
+      'throttle_mode': function(ev) { 
+        if (ev.value) this.sound.play('beep');
+        this.change_throttle_mode(ev.value); 
+      },
+      'braking_thrusters': function(ev) { 
+        if (ev.value) this.sound.loop('thruster');
+        if (!ev.value) this.sound.stop('thruster');
+        if (ev.value) this.sound.loop('brake');
+        if (!ev.value) this.sound.stop('brake');
+        this.braking_thrusters(ev.value); 
+      },
+      'wheel_target': function(ev) { 
+        if (ev.value) this.sound.play('beep');
+        this.mwheel(ev); 
+      },
+      'next_target': function(ev) { 
+        if (ev.value) this.sound.play('beep');
+        this.next_target(ev.value); 
+      },
+      'prev_target': function(ev) { 
+        if (ev.value) this.sound.play('beep');
+        this.prev_target(ev.value); 
+      },
+      'change_gun_1': function(ev) { 
+        if (ev.value) this.sound.play('beep2');
+        this.change_gun(ev.value, 0); 
+      },
+      'change_gun_2': function(ev) { 
+        if (ev.value) this.sound.play('beep2');
+        this.change_gun(ev.value, 1); 
+      },
+      'change_gun_3': function(ev) { 
+        if (ev.value) this.sound.play('beep2');
+        this.change_gun(ev.value, 2); 
+      },
+      'change_gun_4': function(ev) { 
+        if (ev.value) this.sound.play('beep2');
+        this.change_gun(ev.value, 3); 
+      },
+      'fire_mode': function(ev) { 
+        if (ev.value) this.sound.play('beep');
+        this.change_fire_mode(ev.value); 
+      }
       //'jump': function(ev) { this.jump(ev.value); }
     });
     

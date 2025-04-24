@@ -134,8 +134,9 @@ elation.extend('ui.widgets.mainmenu', function(hud) {
   
   this.init = function() {
     this.controller = this.hud.controller;
-    this.container = this.hud.container('mainmenu mainmenu');
-    this.container.innerHTML = "STELLA IMPERIA<span>a WebGL demo by <em>Jamey Lazarus</em></span><div>[ CLICK ]</div>"
+    this.container = this.hud.container('mainmenu mainmenu');    
+    this.container.innerHTML = "STELLA IMPERIA<span>a WebGL demo by <em>Jamey Lazarus</em></span><div> Click To Begin </div>"
+
   }
 
   this.init();
@@ -289,7 +290,11 @@ elation.extend('ui.widgets.aeronautics', function(hud) {
     this.setFPV(event, this.cpos, this.opos);
     this.setPitch(event, this.cpos, this.opos);
     
-    this.opos = { x:this.cpos.x, y:this.cpos.y, z:this.cpos.z };
+    this.opos = { 
+      x: this.cpos.x, 
+      y: this.cpos.y, 
+      z: this.cpos.z 
+    };
   }
   
   this.setSpeed = function(event, cpos, opos) {
@@ -310,6 +315,7 @@ elation.extend('ui.widgets.aeronautics', function(hud) {
     var player = this.hud.controller.objects.player.Player;
     if (player.burner_on && player.fuel > 0) txtColor = [200,200,0];
     if (player.booster_on && player.fuel > 0) txtColor = [200,0,200];
+    if (player.braking && player.fuel > 0) txtColor = [256,96,96];
     
     var r = Math.round(this.speed / 1000);
     
@@ -321,23 +327,24 @@ elation.extend('ui.widgets.aeronautics', function(hud) {
     this.ctx.fillStyle = "rgba("+txtColor[0]+", "+txtColor[1]+", "+txtColor[2]+", 1)";
     this.ctx.font = '18px Arial bold';
     this.ctx.textBaseline = 'bottom';
-    this.ctx.fillText('v'+Math.round(this.speed), 1, 20);
+    this.ctx.fillText('v'+Math.round(this.speed), 40, 20);
     this.ctx.stroke();
     this.ctx.fillStyle = "rgba("+txtColor[0]+", "+txtColor[1]+", "+txtColor[2]+", 1)";
     this.ctx.font = '12px Arial bold';
     this.ctx.textBaseline = 'bottom';
-    this.ctx.fillText('T:'+Math.round(player.throttle * 100)+'%', 1, 35);
+    this.ctx.fillText('T:'+Math.round(player.throttle * 100)+'%', 40, 35);
     this.ctx.stroke();
     this.ctx.fillStyle = "rgba("+txtColor[0]+", "+txtColor[1]+", "+txtColor[2]+", 1)";
     this.ctx.font = '12px Arial bold';
     this.ctx.textBaseline = 'bottom';
-    this.ctx.fillText('F:'+Math.round(player.fuel * 100)+'%', 1, 50);
+    this.ctx.fillText('F:'+Math.round(player.fuel * 100)+'%', 40, 50);
     this.ctx.stroke();
   }
   
   this.setFPV = function(event, cpos, opos) {
     var center = this.center,
         ctx = this.ctx,
+        player = this.hud.controller.objects.player.Player,
         A = this.vector_current,
         B = this.vector_old,
         delta = this.delta,
@@ -367,16 +374,34 @@ elation.extend('ui.widgets.aeronautics', function(hud) {
         cy = center.y + FPVrotate.y,
         lnColor = hex2rgb(this.colors['target_arrow']);
     
+    var headingVector = player.dynamics.vel.clone().normalize();
+
+    var futurePosition = new THREE.Vector3(
+      this.camera.position.x + headingVector.x * 2000,
+      this.camera.position.y + headingVector.y * 2000,
+      this.camera.position.z + headingVector.z * 2000
+    );
+    
+    
+    var projector = new THREE.Projector();
+    var screenSpaceFuturePosition = futurePosition.clone();
+    projector.projectVector(screenSpaceFuturePosition, this.camera);
+
+    var canvasCoords = {
+      x: (screenSpaceFuturePosition.x * this.width) / 2 + this.width / 2,
+      y: -(screenSpaceFuturePosition.y * this.height) / 2 + this.height / 2 // Flip y-axis for canvas
+    };
+    
     ctx.beginPath();
     ctx.lineWidth = 2;
     ctx.strokeStyle = "rgba("+lnColor[0]+", "+lnColor[1]+", "+lnColor[2]+", 1)";
-    ctx.arc(cx,cy,6,0,Math.PI*2,true);
-    ctx.moveTo(cx+6,cy);
-    ctx.lineTo(cx+6+12,cy);
-    ctx.moveTo(cx-6,cy);
-    ctx.lineTo(cx-6-12,cy);
-    ctx.moveTo(cx,cy-6);
-    ctx.lineTo(cx,cy-6-6);
+    ctx.arc(canvasCoords.x, canvasCoords.y, 6, 0, Math.PI*2,true);
+    ctx.moveTo(canvasCoords.x + 6, canvasCoords.y);
+    ctx.lineTo(canvasCoords.x + 6 + 12, canvasCoords.y);
+    ctx.moveTo(canvasCoords.x - 6, canvasCoords.y);
+    ctx.lineTo(canvasCoords.x - 18, canvasCoords.y);
+    ctx.moveTo(canvasCoords.x, canvasCoords.y - 6);
+    ctx.lineTo(canvasCoords.x, canvasCoords.y - 12);
     ctx.stroke();
   }
   
@@ -958,7 +983,7 @@ elation.extend('ui.widgets.ops', function(hud) {
     ctx.fillStyle = "rgba(96, 96, 96, 1)";
     ctx.font = '36px IMPACT';
     ctx.textBaseline = 'bottom';
-    ctx.fillText('FIRE CONTROL', 10,45);
+    ctx.fillText('STATUS', 10,45);
     ctx.fill();
 
     for (var i=0; i<p.length; i++) {
@@ -971,16 +996,16 @@ elation.extend('ui.widgets.ops', function(hud) {
           t = p[i],
           x = t[0],
           y = t[1] - 5 + 25,
-          color = weapon.enabled ? '196, 0, 0' : '96, 96, 96';
-      
+          color = weapon.enabled ? '196, 0, 0' : '64, 64, 64';
+
       ctx.beginPath();
-      ctx.fillStyle = "rgba("+color+", .5)";
+      ctx.fillStyle = "rgba("+color+", .6)";
       ctx.moveTo(x,y);
       ctx.lineTo(x,y-r);
-      ctx.arc(x,y+20,r,s,e);
-      ctx.lineTo(x,y);
+      ctx.arc(x,y+20,r,s,weapon.enabled ? e : 11);
+      ctx.lineTo(x,y-20);
       ctx.fill();
-      ctx.fillStyle = "rgba(255, 140, 0, 1)";
+      ctx.fillStyle = weapon.enabled ? "rgba(255, 140, 0, 1)" : "rgba(96, 96, 96, 1)";
       ctx.font = '22px IMPACT';
       ctx.textBaseline = 'bottom';
       
@@ -1174,7 +1199,7 @@ elation.extend('ui.widgets.targeting', function(hud) {
   this.width = 500;
   this.height = 500;
   this.colors = hud.colors;
-  this.opos = { x:0, y:0, z:0 };
+  this.oldPosition = { x:0, y:0, z:0 };
 
   this.init = function() {
     this.camera = this.hud.controller.camera;
@@ -1228,33 +1253,38 @@ elation.extend('ui.widgets.targeting', function(hud) {
   this.targetring = function() {
     //if (!elation.utils.arrayget(this, 'camera.position.y'))
       //return;
-    
     var //ctx = this.ctx,
-        lnColor = hex2rgb(this.colors['target_ring']),
+        ringColor = [123,156,171],
+        centerColor = hex2rgb(this.colors['target_ring']),
         radius = 115,
         linelength = 6;
         //cx = this.center.x, 
         //cy = this.center.y;
     
+    var player = this.hud.controller.objects?.player?.Player || {};
+    if (player.burner_on && player.fuel > 0) ringColor = [200,200,0];
+    if (player.booster_on && player.fuel > 0) ringColor = [200,0,200];
+    if (player.braking && player.fuel > 0) ringColor = [256,96,96];
     //this.container.width = this.width;
     //this.radius = radius;
     
     if (!this.hud.overlay)
       return;
-    
+
+    this.hud.overlay.clear();
     this.hud.overlay.draw((function(ctx, cx, cy) {
-      /*ctx.beginPath();
-      ctx.strokeStyle = "rgba("+lnColor[0]+", "+lnColor[1]+", "+lnColor[2]+", .5)";
-      ctx.arc(cx,cy,30,0,Math.PI*2,true);
+      ctx.beginPath();
+      ctx.strokeStyle = "rgba("+centerColor[0]+", "+centerColor[1]+", "+centerColor[2]+", .5)";
+      ctx.arc(cx,cy,20,0,Math.PI*2,true);
       ctx.stroke();
       ctx.beginPath();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "rgba("+lnColor[0]+", "+lnColor[1]+", "+lnColor[2]+", .5)";
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba("+ringColor[0]+", "+ringColor[1]+", "+ringColor[2]+", .5)";
       ctx.arc(cx,cy,radius,0,Math.PI*2,true);
-      ctx.stroke();*/
+      ctx.stroke();
       ctx.beginPath();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "rgba("+lnColor[0]+", "+lnColor[1]+", "+lnColor[2]+", .5)";
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba("+centerColor[0]+", "+centerColor[1]+", "+centerColor[2]+", 1)";
       ctx.moveTo(cx, cy-20);
       ctx.lineTo(cx, cy-20-linelength);
       ctx.moveTo(cx, cy+20);
@@ -1266,121 +1296,137 @@ elation.extend('ui.widgets.targeting', function(hud) {
       ctx.stroke();
     }));
   }
+
+  this.checkDirection = function(relativeHeading) {
+    return Math.abs(relativeHeading) > Math.PI / 2; // Target is behind if angle > 90°
+  };
   
-  this.render = function(event) { 
-    var ver = function(angle) {
-      return (angle > (Math.PI/2) && angle < (Math.PI/2));
-    };
+  this.render = function(event) {
+    this.targetring();
     
-    var dim = elation.html.dimensions(window),
-        ctx = this.canvas_hud_ctx,
+    var windowBox = elation.html.dimensions(window),
+        canvasContext = this.canvas_hud_ctx,
         hud = this.hud, 
-        blipColor = hud.color('target_blip'),
-        lnColor = hud.color('radar_sweeper'),
-        tgColor = hud.color('radar_sweeper'),
-        campos = this.camera.matrix.decompose(),
-        angle = elation.utils.quat2euler(campos[1]),
-        //angle = hud.radar.angle,
-        heading = angle[0],
+        targetColor = hud.color('radar_sweeper'),
         contact = hud.target.list.current_target_data;
     
-    //console.log(campos, angle, heading, contact);
     if (!contact || contact.type == 'player')
       return;
     
-    var bpos = contact.position,
-        cpos = this.camera.position,
-        t = ver(heading),
-        r = 115,
-        tbr = 15,
-        tbd = 8,
-        cx = this.canvas_hud_center.x,
-        cy = this.canvas_hud_center.y,
-        p = new THREE.Projector(),
-        s = p.projectVector(bpos.clone(), this.camera),
-        A = [ bpos.x, bpos.y, bpos.z ],
-        B = [ cpos.x, cpos.y, cpos.z ],
-        dist = Math.round(elation.vector3.distance(A, B)),
-        s = {
-          x: t?-s.x:s.x,
-          y: t?-s.y:s.y,
-          z: s.z
-        },
-        q = {
-          n: contact.type,
-          x: (dim.w/2) * s.x,
-          y: (dim.h/2) * s.y,
-          z: s.z,
-          a: heading
-        },
-        v = {
-          x: bpos.x - cpos.x,
-          y: bpos.y - cpos.y,
-          z: bpos.z - cpos.z
-        },
-        x = (cx+q.x),
-        y = (cy-q.y),
-        an, rot2;
-    
-    var coords = { 
-      x:x,// < tbr ? tbr : x > dim.w-tbr ? dim.w-tbr : x, 
-      y:y// < tbr ? tbr : y > dim.h-tbr ? dim.h-tbr : y
-    };
-    
-    if (t || Math.pow((q.x), 2) + Math.pow((q.y), 2) > Math.pow(r,2)) {
-      an = Math.atan2(cx*s.x, cy*s.y);
-      rot = elation.transform.rotate(0, r, an);
-      rot2 = elation.transform.rotate(0, r-tbr, an);
-    }
-    //console.log(elation.vector3.dot(q, v));
-    this.canvas_hud.width = this.canvas_hud_width;
-    
-    if (!t) {
-      ctx.beginPath();
-      ctx.strokeStyle = "rgba("+tgColor[0]+", "+tgColor[1]+", "+tgColor[2]+", 1)";
-      ctx.lineWidth = 1;
-      ctx.lineCap = 'butt'; // heh
-      ctx.moveTo(coords.x-tbr, coords.y-tbd);
-      ctx.lineTo(coords.x-tbr, coords.y-tbr);
-      ctx.lineTo(coords.x-tbd, coords.y-tbr);
-      ctx.moveTo(coords.x+tbd, coords.y-tbr);
-      ctx.lineTo(coords.x+tbr, coords.y-tbr);
-      ctx.lineTo(coords.x+tbr, coords.y-tbd);
-      ctx.moveTo(coords.x+tbr, coords.y+tbd);
-      ctx.lineTo(coords.x+tbr, coords.y+tbr);
-      ctx.lineTo(coords.x+tbd, coords.y+tbr);
-      ctx.moveTo(coords.x-tbd, coords.y+tbr);
-      ctx.lineTo(coords.x-tbr, coords.y+tbr);
-      ctx.lineTo(coords.x-tbr, coords.y+tbd);
-      ctx.stroke();
-      
-      ctx.fillStyle = "rgba(255, 140, 0, 1)";
-      ctx.font = '10px sans-serif bold';
-      var dist = dist,
-          metrics = ctx.measureText(dist);  
+    var relativePosition = new THREE.Vector3(
+        contact.position.x - this.camera.position.x,
+        contact.position.y - this.camera.position.y,
+        contact.position.z - this.camera.position.z
+    );
 
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(dist, coords.x-(metrics.width/2), coords.y+tbr+15);
-      
+    // Calculate angle in the horizontal plane
+    var cameraDirection = elation.vector3.applyQuaternionToVector3(
+      new THREE.Vector3(0, 0, -1), 
+      this.camera.quaternion
+    );
+
+    var targetDirection = relativePosition.normalize(); // Direction to the target
+
+    var heading = elation.vector3.normalizeAngle(
+      Math.atan2(targetDirection.x, targetDirection.z) - 
+      Math.atan2(cameraDirection.x, cameraDirection.z)
+    );
+
+    if (heading > Math.PI) heading -= 2 * Math.PI;
+    if (heading < -Math.PI) heading += 2 * Math.PI;
+  
+    var contactPosition = contact.position,
+        cameraPosition = this.camera.position,
+        isFacing = this.checkDirection(heading),
+        centerHudX = this.canvas_hud_center.x,
+        centerHudY = this.canvas_hud_center.y,
+        projection = new THREE.Projector(),
+        projectVector = projection.projectVector(contactPosition.clone(), this.camera),
+        boxVector = [ contactPosition.x, contactPosition.y, contactPosition.z ],
+        cameraVector = [ cameraPosition.x, cameraPosition.y, cameraPosition.z ],
+        distance = Math.round(elation.vector3.distance(boxVector, cameraVector)),
+        projectVector = {
+          x: (isFacing ? -1 : 1) * projectVector.x,
+          y: (isFacing ? -1 : 1) * projectVector.y,        
+          z: projectVector.z
+        },
+        targetBoxData = {
+          type: contact.type,
+          screenX: (windowBox.w / 2) * projectVector.x,
+          screenY: (windowBox.h / 2) * projectVector.y,
+          screenZ: projectVector.z,
+          angle: heading
+        },
+        x = (centerHudX + targetBoxData.screenX),
+        y = (centerHudY - targetBoxData.screenY),
+        rotationAngle = 115,
+        tbr = 15,
+        tbd = 10,
+        coords = { x, y },
+        headingToTarget, headingDot, headingTail;
+    
+    if (isFacing || Math.pow(targetBoxData.screenX, 2) + Math.pow(targetBoxData.screenY, 2) > Math.pow(rotationAngle, 2)) {
+      headingToTarget = elation.vector3.normalizeAngle(
+        Math.atan2(centerHudX * projectVector.x, centerHudY * projectVector.y)
+      );
+      headingDot = elation.transform.rotate(0, rotationAngle, headingToTarget);
+      headingTail = elation.transform.rotate(0, rotationAngle-tbr, headingToTarget);
     }
     
-    if (an) {
-      ctx.beginPath();
-      ctx.lineWidth = 2;
-      ctx.fillStyle = "rgba(255, 140, 0, 1)";
-      ctx.arc(cx-rot.x,cy-rot.y,4,0,Math.PI*2,true);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.strokeStyle = "rgba(255, 140, 0, 1)";
-      ctx.moveTo(cx-rot.x,cy-rot.y);
-      ctx.lineTo(cx-rot2.x,cy-rot2.y);
-      ctx.stroke();
+    this.canvas_hud.width = this.canvas_hud_width;
+
+    if (!isFacing) {
+      canvasContext.beginPath();
+      canvasContext.strokeStyle = "rgba("+targetColor[0]+", "+targetColor[1]+", "+targetColor[2]+", 1)";
+      canvasContext.lineWidth = 1;
+      canvasContext.lineCap = 'butt'; // heh
+      canvasContext.moveTo(coords.x-tbr, coords.y-tbd);
+      canvasContext.lineTo(coords.x-tbr, coords.y-tbr);
+      canvasContext.lineTo(coords.x-tbd, coords.y-tbr);
+      canvasContext.moveTo(coords.x+tbd, coords.y-tbr);
+      canvasContext.lineTo(coords.x+tbr, coords.y-tbr);
+      canvasContext.lineTo(coords.x+tbr, coords.y-tbd);
+      canvasContext.moveTo(coords.x+tbr, coords.y+tbd);
+      canvasContext.lineTo(coords.x+tbr, coords.y+tbr);
+      canvasContext.lineTo(coords.x+tbd, coords.y+tbr);
+      canvasContext.moveTo(coords.x-tbd, coords.y+tbr);
+      canvasContext.lineTo(coords.x-tbr, coords.y+tbr);
+      canvasContext.lineTo(coords.x-tbr, coords.y+tbd);
+      canvasContext.stroke();
+      canvasContext.fillStyle = "rgba(255, 140, 0, 1)";
+      canvasContext.font = '10px sans-serif bold';
+      canvasContext.textBaseline = 'bottom';
+      canvasContext.fillText(
+        distance, 
+        coords.x - (canvasContext.measureText(distance).width / 2), 
+        coords.y + tbr + 15
+      );
+    }
+
+    if (headingToTarget) {
+      canvasContext.beginPath();
+      canvasContext.lineWidth = 2;
+      canvasContext.fillStyle = "rgba(255, 140, 0, 1)";
+      canvasContext.arc(
+        centerHudX - headingDot.x,
+        centerHudY - headingDot.y,
+        4,
+        0,
+        Math.PI*2,
+        true
+      );
+      canvasContext.fill();
+      canvasContext.beginPath();
+      canvasContext.strokeStyle = "rgba(255, 140, 0, 1)";
+      canvasContext.moveTo(centerHudX-headingDot.x,centerHudY-headingDot.y);
+      canvasContext.lineTo(centerHudX-headingTail.x,centerHudY-headingTail.y);
+      canvasContext.stroke();
     }
     
-    this.opos = {
-      x: cpos.x,
-      y: cpos.y,
-      z: cpos.z
+    this.oldPosition = {
+      x: cameraPosition.x,
+      y: cameraPosition.y,
+      z: cameraPosition.z
     };
   };
     
@@ -1493,6 +1539,30 @@ elation.extend('ui.widgets.console', function(hud) {
   this.init();
 });
 
+elation.extend('vector3.normalizeAngle', function(angle) {
+  while (angle > Math.PI) angle -= 2 * Math.PI;
+  while (angle < -Math.PI) angle += 2 * Math.PI;
+  return angle;
+});
+
+elation.extend('vector3.applyQuaternionToVector3', function(vector, quaternion) {
+    var x = vector.x, y = vector.y, z = vector.z;
+    var qx = quaternion.x, qy = quaternion.y, qz = quaternion.z, qw = quaternion.w;
+
+    // Calculate quaternion * vector
+    var ix = qw * x + qy * z - qz * y;
+    var iy = qw * y + qz * x - qx * z;
+    var iz = qw * z + qx * y - qy * x;
+    var iw = -qx * x - qy * y - qz * z;
+
+    // Calculate result * inverse quaternion
+    vector.x = ix * qw + iw * -qx + iy * -qz - iz * -qy;
+    vector.y = iy * qw + iw * -qy + iz * -qx - ix * -qz;
+    vector.z = iz * qw + iw * -qz + ix * -qy - iy * -qx;
+
+    return vector;
+});
+
 elation.extend('vector3.dot', function(A, B) {
   var D = [ 
         A[0] * B[0],
@@ -1518,6 +1588,14 @@ elation.extend('vector3.normalize', function(A) {
       ];
   
   return C;
+});
+
+elation.extend('vector3.crossProduct', function(vectorA, vectorB) {
+  return new THREE.Vector3(
+      vectorA.y * vectorB.z - vectorA.z * vectorB.y,
+      vectorA.z * vectorB.x - vectorA.x * vectorB.z,
+      vectorA.x * vectorB.y - vectorA.y * vectorB.x
+  );
 });
 
 elation.extend('vector3.subtract', function(A, B) {
@@ -1609,7 +1687,7 @@ elation.extend('utils.quat2euler', function(q, degrees) {
       sqz   = q.z * q.z,
       yaw   = Math.atan2(2 * q.y * q.w - 2 * q.x * q.z, 1 - 2 * sqy - 2 * sqz),
       pitch = Math.atan2(2 * q.x * q.w - 2 * q.y * q.z, 1 - 2 * sqx - 2 * sqz),
-      roll  = Math.asin(2 * q.x * q.y + 2 * q.z * q.w),
+      roll = Math.atan2(2 * (q.x * q.y + q.z * q.w), 1 - 2 * (sqy + sqz)),
       r2d   = function(rad) { return rad * 180 / Math.PI; };
   
   if (degrees)
